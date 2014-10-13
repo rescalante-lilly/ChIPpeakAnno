@@ -1,0 +1,285 @@
+%\VignetteIndexEntry{ChIPpeakAnno Vignette}
+%\VignetteDepends{ChIPpeakAnno}
+%\VignetteKeywords{ChIP-seq Annotation}
+%\VignettePackage{ChIPpeakAnno}
+\documentclass[12pt]{article}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{fullpage}
+\usepackage[authoryear,round]{natbib}
+\bibliographystyle{plainnat}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+
+\author{Lihua Julie Zhu\footnote{julie.zhu@umassmed.edu}}
+\begin{document}
+\title{The ChIPpeakAnno user's guide}
+
+\maketitle
+
+\tableofcontents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Chromatin immunoprecipitation (ChIP) followed by high-throughput tag sequencing (ChIP-seq) and ChIP followed by genome tiling array analysis (ChIP-chip) become more and more prevalent high throughput technologies for identifying the binding sites of DNA-binding proteins in a genome-wide bases. A number of algorithms have been published to facilitate the identification of the binding sites of the DNA-binding proteins of interest. The identified binding sites in the list of peaks are usually converted to BED or WIG file format to be loaded to UCSC genome browser as custom tracks for investigators to view the proximity to various genomic features such as genes, exons and conserved elements. However, clicking through the genome browser could be a daunting task for the biologist if the number of peaks gets large or the peaks spread widely across the genome. Here we have developed a Bioconducor package called ChIPpeakAnno to facilitate the batch annotation of the peaks identified from either ChIP-seq or ChIP-chip experiments. We have implemented functionality to find the nearest gene, exon, miRNA, gene end or custom features supplied by users such as most conserved elements and other transcription factor binding sites leveraging IRanges. Since the genome annotation gets updated from time to time, we have leveraged the \Rpackage{biomaRt} package from Bioconductor to retrieve the annotation data on the fly if the annotation of interest is available via the \Rpackage{biomaRt} package. The users also have the flexibility to pass their own annotation data as RangedData or pass in annotation data from \Rpackage{GenomicFeatures}. We have also leveraged \Rpackage{BSgenome} and \Rpackage{biomaRt} package on implementing functions to retrieve the sequences around the peak identified for peak validation. To understand whether the identified peaks are enriched around genes with certain GO terms, we have implemented GO enrichment test in ChIPpeakAnno package leveraging the hypergeometric test \Rfunction{phyper} in \Rpackage{stats} package and integrated with Gene Ontology (GO) annotation from \Rpackage{GO.db} package and multiplicity adjustment functions from \Rpackage{multtest} package.
+
+\section{Examples of using ChIPpeakAnno}
+
+\subsection{Task 1:  Find the nearest feature such as gene and the distance to the feature such as the transcription start site (TSS) of the nearest gene}
+
+We have a list of peaks identified from ChIP-seq or ChIP-chip experiments and we would like to retrieve the nearest gene and distance to the corresponding gene transcription start site. We have retrieved all the genomic locations of the genes for human genome as TSS.human.NCBI36 data package for repeated use with function \Rfunction{getAnnotation}, now we just pass the annotation to the \Rfunction{annotatePeakInBatch} function.
+
+\begin{scriptsize}
+<<>>=
+library(ChIPpeakAnno)
+data(myPeakList)
+data(TSS.human.NCBI36)
+annotatedPeak = annotatePeakInBatch(myPeakList[1:6,], AnnotationData=TSS.human.NCBI36)
+as.data.frame(annotatedPeak)
+@
+\end{scriptsize}
+
+To annotate the peaks with other genomic feature, you will need to call function \Rfunction{getAnnotation} with featureType, e.g., ``Exon" for finding the nearest exon, and ``miRNA" for finding the nearest miRNA, ``5utr" or `3utr"for finding the overlapping 5 prime UTR or 3 prime UTR. Please refer to \Rfunction{getAnnotation} function for more details. 
+
+We have presented the examples using human genome as annotation source. To annotate your data with other species, you will need to pass to the function \Rfunction{getAnnotation} the appropriate dataset for example, drerio\_gene\_ensembl for zebrafish genome, mmusculus\_gene\_ensembl for mouse genome and rnorvegicus\_gene\_ensembl for rat genome.
+For a list of available biomart and dataset, please refer to the \Rpackage{biomaRt} package documentation (Durinck S. et al., 2005).  For fast access, in addition to TSS.human.NCBI36, TSS.human.GRCh37, TSS.mouse.NCBIM37, TSS.mouse.GRCm38, TSS.rat.RGSC3.4, TSS.rat.Rnor\_5.0, TSS.zebrafish.Zv8, and TSS.zebrafish.Zv9 are included as annotation data packages.
+
+You could also pass your own annotation data into the function \Rfunction{annotatePeakInBatch}. For example, if you have a list of transcription factor biding sites from literature and are interested in obtaining the nearest binding site of the transcription factor and distance to it for the list of peaks.
+
+\begin{scriptsize}
+<<>>=
+myPeak1 = RangedData(IRanges(start=c(967654, 2010897, 2496704, 3075869, 
+3123260 ,3857501,201089,1543200,1557200,1563000,1569800,167889600), 
+end= c(967754, 2010997, 2496804, 3075969, 3123360 ,3857601,201089,1555199,
+1560599,1565199,1573799,167893599),names=c("Site1", "Site2", "Site3", "Site4", 
+"Site5", "Site6", "Site7","Site8","Site9","Site10","Site11","Site12")), 
+space=c("1", "2", "3", "4", "5", "6","2","6","6","6","6","5"))
+
+TFbindingSites = RangedData(IRanges(start=c(967659, 2010898, 2496700, 3075866, 
+3123260 ,3857500, 96765, 201089, 249670, 307586, 312326 ,385750,1549800,1554400,
+1565000,1569400,167888600), end=c(967869, 2011108, 2496920,3076166,3123470,
+3857780, 96985, 201299, 249890, 307796,312586,385960,1550599,1560799,1565399,
+1571199,167888999), names=c("t1", "t2", "t3", "t4", "t5", "t6","t7", "t8", "t9", "t10", "t11", 
+"t12","t13","t14","t15","t16","t17")), space=c("1", "2", "3", "4", "5", "6","1", "2", "3", "4", 
+"5", "6","6","6","6","6","5"), strand=c(1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,1,1,1,1,1))
+annotatedPeak2 = annotatePeakInBatch(myPeak1, AnnotationData=TFbindingSites)
+pie(table(as.data.frame(annotatedPeak2)$insideFeature))
+as.data.frame(annotatedPeak2)
+@
+\end{scriptsize}
+
+Both BED format and GFF format are common file format that provides a flexible way to define the peaks and annotations as the data lines. Therefore, conversion functions \Rfunction{BED2RangedData} and \Rfunction{GFF2RangedData} were implemented for converting these data format to RangedData before calling \Rfunction{annotatePeakInBatch}
+
+Once you annotated the peak list, you can plot the distance to nearest feature such as TSS.
+
+\subsection{Task 2:  Obtain overlapping peaks for potential transcription factor complex and determine the significance of the overlapping and generate Venn Diagram }
+
+Here is an example of obtaining overlapping peaks with maximum gap 1kb for two peak ranges.
+
+\begin{scriptsize}
+<<>>=
+peaks1 = RangedData(IRanges(start=c(967654, 2010897, 2496704, 
+3075869, 3123260 ,3857501,201089,1543200,1557200,1563000,
+1569800,167889600), end= c(967754, 2010997, 2496804, 3075969, 
+3123360 ,3857601,201089,1555199,1560599,1565199,1573799,
+167893599),names=c("Site1", "Site2", "Site3", "Site4", 
+"Site5", "Site6", "Site7","Site8","Site9","Site10","Site11","Site12")), 
+space=c("1", "2", "3", "4", "5", "6","2","6","6","6","6","5"),strand=as.integer(1))
+
+peaks2 = RangedData(IRanges(start=c(967659, 2010898, 2496700, 3075866, 3123260 ,
+3857500, 96765, 201089, 249670, 307586, 312326 ,385750,1549800,1554400,1565000,
+1569400,167888600), end=c(967869, 2011108, 2496920,3076166,3123470,3857780, 
+96985, 201299, 249890, 307796,312586,385960,1550599,1560799,1565399,
+1571199,167888999), names=c("t1", "t2", "t3", "t4", "t5", "t6","t7", "t8", "t9", "t10", "t11", 
+"t12","t13","t14","t15","t16","t17")), space=c("1", "2", "3", "4", "5", "6","1", "2", "3", "4", "5", 
+"6","6","6","6","6","5"), strand=c(1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,1,1,1,1,1))
+
+t1 =findOverlappingPeaks(peaks1, peaks2, maxgap=1000, minoverlap =20,select="first", NameOfPeaks1="TF1", NameOfPeaks2="TF2", annotate=1) 
+
+@
+\end{scriptsize}
+
+Here is a list of overlapping peaks with maximum gap 1kb and a pie graph describing the distribution of relative position of peaks1 to peaks2 for overlapping peaks.
+\begin{scriptsize}
+<<>>=
+overlappingPeaks = t1$OverlappingPeaks
+overlappingPeaks
+pie(table(overlappingPeaks$overlapFeature))
+@
+\end{scriptsize}
+Here is the merged overlapping peaks, which can be used to obtain overlapping peaks with another TF binding sites from a protein complex.
+\begin{scriptsize}
+<<>>=
+as.data.frame(t1$MergedPeaks)
+@
+\end{scriptsize}
+
+Here is the peaks in peaks1 that overlaps with peaks in peaks2
+
+\begin{scriptsize}
+<<>>=
+as.data.frame(t1$Peaks1withOverlaps)
+@
+\end{scriptsize}
+
+Here is the peaks in peaks2 that overlap with peaks in peaks1
+
+\begin{scriptsize}
+<<>>=
+as.data.frame(t1$Peaks2withOverlaps)
+@
+\end{scriptsize}
+The \Rfunction{findOVerlappingPeaks} function can be repeatedly called to obtain for example, the peaks in peaks1 that overlap with peaks in both peaks2 and peaks3.
+\begin{scriptsize}
+<<>>=
+peaks3 = RangedData(IRanges(start=c(967859, 2010868, 2496500, 3075966, 
+3123460 ,3851500, 96865, 201189, 249600, 307386), 
+end=c(967969, 2011908, 2496720,3076166,3123470,3857680, 96985, 
+201299, 249890, 307796), names=c("p1", "p2", "p3", "p4", "p5", "p6","p7", "p8", "p9", "p10")),
+ space=c("1", "2", "3", "4", "5", "6","1", "2", "3", "4"), strand=
+c(1,1,1,1,1,1,-1,-1,-1,-1))
+
+findOverlappingPeaks(findOverlappingPeaks(peaks1, peaks2, maxgap=1000, minoverlap = 1,
+select= "first",NameOfPeaks1="TF1", NameOfPeaks2="TF2")$Peaks1withOverlap, 
+peaks3, maxgap=1000, minoverlap = 1, select="first", NameOfPeaks1="TF1TF2", NameOfPeaks2="TF3")$Peaks1withOverlap
+@
+\end{scriptsize}
+
+Venn Diagram can be generated by the following function call with p-value that indicates whether the extent of overlapping is significant.
+\begin{scriptsize}
+<<>>=
+makeVennDiagram(RangedDataList(peaks1, peaks2), NameOfPeaks=c("TF1", "TF2"), 
+maxgap=0, minoverlap =1, totalTest=100, cex = 1, counts.col = "red",useFeature=FALSE)
+@
+\end{scriptsize}
+
+\subsection{Task 3:  Obtain sequences surrounding the peaks for PCR validation or motif discovery}
+
+Here is an example of obtaining sequences surrounding the peak intervals including 20 bp upstream and downstream sequence.
+
+\begin{scriptsize}
+<<>>=
+peaks = RangedData(IRanges(start=c(100, 500), end=c(300, 600), names=c("peak1", "peak2")), space=c("NC_008253", "NC_010468"))
+library(BSgenome.Ecoli.NCBI.20080805)
+peaksWithSequences = getAllPeakSequence(peaks, upstream = 20,
+	downstream = 20, genome = Ecoli)
+@
+\end{scriptsize}
+
+You can easily convert the obtained sequences into fasta format for motif discovery by calling the function \Rfunction{write2FASTA}.
+
+\begin{scriptsize}
+<<>>=
+write2FASTA(peaksWithSequences,"test.fa")
+@ 
+\end{scriptsize}
+
+\subsection{Task 4:  Obtain enriched gene ontology (GO) terms near the peaks}
+
+Once you have obtained the annotated peak data from the example above, you can also use the function \Rfunction{getEnrichedGO} to obtain a list of enriched gene ontology (GO) terms using hypergeometric test.
+
+library(org.Hs.eg.db)
+
+$enrichedGO = getEnrichedGO$
+(annotatedPeak,
+$orgAnn=``org.Hs.eg.db"$,
+$maxP=0.01$,
+$multiAdj=TRUE$, 
+$minGOterm=10$,
+$multiAdjMethod=``BH" $
+)
+
+
+Please note that org.Hs.eg.db is the GO gene mapping for Human, for other organisms, please refer to http://www.bioconductor.org/packages/release/data/annotation/ for additional org.xx.eg.db packages.
+
+\begin{scriptsize}
+<<>>=
+data(enrichedGO)
+@ 
+\end{scriptsize}
+
+Here is a list of enriched GO biological process for myPeakList dataset.
+\begin{scriptsize}
+<<>>=
+enrichedGO$bp[1:6,]
+@
+\end{scriptsize}
+
+Here is a list of enriched GO molecular functions for myPeakList dataset.
+
+\begin{scriptsize}
+<<>>=
+enrichedGO$mf[1:6,]
+@ 
+\end{scriptsize}
+ 
+Heres is a list of enriched GO cellular components for myPeakList dataset.
+
+\begin{scriptsize}
+<<>>=
+enrichedGO$cc
+@
+\end{scriptsize}
+
+\subsection{Task 5:  Find peaks with bi-directional promoters}
+
+Here is an example to find peaks with bi-directional promoters and output percent of peaks near bi-directional promoters.
+
+\begin{scriptsize}
+<<>>=
+data(myPeakList)
+data(TSS.human.NCBI36)
+annotatedBDP = peaksNearBDP(myPeakList[1:10,], AnnotationData=TSS.human.NCBI36,
+MaxDistance=5000,PeakLocForDistance =  "middle", 
+	FeatureLocForDistance = "TSS")
+annotatedBDP$peaksWithBDP
+c(annotatedBDP$percentPeaksWithBDP, annotatedBDP$n.peaks, annotatedBDP$n.peaksWithBDP)
+@
+\end{scriptsize}
+
+\subsection{Task 6: Output a summary of motif occurrence in the peaks.}
+
+Here is an example to search the peaks for the motifs in examplepattern.fa file.
+
+\begin{scriptsize}
+<<>>=
+peaks = RangedData(IRanges(start=c(100, 500), end=c(300, 600), names=c("peak1", "peak2")), 
+space=c("NC_008253", "NC_010468"))
+filepath =system.file("extdata", "examplePattern.fa", package="ChIPpeakAnno")
+library(BSgenome.Ecoli.NCBI.20080805)
+summarizePatternInPeaks(patternFilePath=filepath, format="fasta", skip=0L, BSgenomeName=Ecoli, peaks=peaks)
+@
+\end{scriptsize}
+
+\subsection{Task 7: Add other IDs to annotated peaks or enrichedGO}
+
+Here is an example to add gene symbol to annotated peaks .
+
+\begin{scriptsize}
+<<>>=
+data(annotatedPeak)
+library(org.Hs.eg.db)
+addGeneIDs(annotatedPeak[1:6,],"org.Hs.eg.db",c("symbol"))
+addGeneIDs(annotatedPeak$feature[1:6],"org.Hs.eg.db",c("symbol"))
+@
+\end{scriptsize}
+
+\section{References}
+1. Y. Benjamini and Y. Hochberg (1995). Controlling the false discovery rate: a practical and powerful approach to multiple testing. J. R. Statist. Soc. B. Vol. 57: 289-300. 
+\\2. Y. Benjamini and D. Yekutieli (2001). The control of the false discovery rate in multiple hypothesis testing under dependency. Annals of Statistics. Accepted. 
+\\3. S. Durinck et al. (2005) BioMart and Bioconductor: a powerful link between biological biomarts and microarray data analysis. Bioinformatics, 21, 3439-3440. 
+\\4. S. Dudoit, J. P. Shaffer, and J. C. Boldrick (Submitted). Multiple hypothesis testing in microarray experiments. 
+\\5. Y. Ge, S. Dudoit, and T. P. Speed. Resampling-based multiple testing for microarray data hypothesis, Technical Report \#633 of UCB Stat. http://www.stat.berkeley.edu/~gyc 
+\\6. R. Gentleman et al. (2004) Bioconductor: open software development for computational biology and bioinformatics. Genome Biol., 5:R80
+\\7. Y. Hochberg (1988). A sharper Bonferroni procedure for multiple tests of significance, Biometrika. Vol. 75: 800-802. 
+\\8. S. Holm (1979). A simple sequentially rejective multiple test procedure. Scand. J. Statist.. Vol. 6: 65-70. 
+\\9. N. L. Johnson,S. Kotz and A. W. Kemp (1992) Univariate Discrete Distributions, Second Edition. New York: Wiley
+\\10. G. Robertson et al. (2007) Genome-wide profiles of STAT1 DNA association using chromatin immunoprecipitation and massively parallel sequencing. Nat Methods, 4:651-7.
+\\11. Zhu L.J. et al. (2010) ChIPpeakAnno: a Bioconductor package to annotate ChIP-seq and ChIP-chip data. BMC Bioinformatics 2010, 11:237doi:10.1186/1471-2105-11-237.
+\section{Session Info}
+<<>>=
+sessionInfo()
+@
+\end{document}

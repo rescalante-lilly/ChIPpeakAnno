@@ -1,0 +1,49 @@
+CHANGES IN VERSION 2.12.3
+------------------------
+BUG FIXES
+
+    o relative postion for negative strand are not correct when call findOverlappingPeaks.
+
+CHANGES IN VERSION 2.11.4
+------------------------
+NEW FEATURE
+
+    o Add selection of 'shortestDistance' to output parameter of annotatePeakInBatch.
+
+CHANGES IN VERSION 2.11.3
+------------------------
+NEW FEATURE
+
+    o Improved efficiency of annotatePeakInBatch.
+
+CHANGES IN VERSION 2.9.6
+------------------------
+BUG FIXES
+
+    o Changed Enhancer.Silencer to intergenic.Region in assignChromosomeRegion.
+
+CHANGES IN VERSION 2.9.5
+------------------------
+BUG FIXES
+
+    o negative widths are not allowed when call findOverlappingPeaks.
+
+
+NEW FEATURES IN VERSION 2.2.0
+------------------------
+
+     o Find the peaks with bi-directional promoters with summary
+     statistics (peaksNearBDP).
+
+     o Summarize the occurrence of motifs in peaks
+     (summarizePatternInPeaks).
+
+     o Add other IDs to annotated peaks or enrichedGO (addGeneIDs)The
+     function makeVennDiagram supports 4-way venn diagram.
+
+     o Enriched Gene Ontology (GO) terms are annotated with a list of
+     genes which can be traced back to peaks.
+
+     o FAQ: http://pgfe.umassmed.edu/ChIPpeakAnno/FAQ.html.
+
+     o Summarize peak distribution over exon, intron, enhancer, proximal promoter, 5 prime UTR and 3 prime UTR (assignChromosomeRegion)
