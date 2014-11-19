@@ -1,3 +1,9 @@
+CHANGES IN VERSION 2.16.2
+------------------------
+NEW FEATURE
+
+    o Add error message for makeVennDiagram when totalTest is too small.
+
 CHANGES IN VERSION 2.12.3
 ------------------------
 BUG FIXES

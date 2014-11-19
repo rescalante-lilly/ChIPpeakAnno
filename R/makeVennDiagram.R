@@ -43,6 +43,9 @@ function(Peaks, NameOfPeaks, maxgap=0L, minoverlap=1L, totalTest, useFeature=FAL
 			rownames(Peaks[[i]]) = formatC(1:dim(Peaks[[i]])[1], width=nchar(dim(Peaks[[i]])[1]), flag='0')
 		}		
 	})
+	if(totalTest < max(sapply(Peaks, nrow))){
+        stop("totaltest specifies the total number of possible peaks in the testing space. It should be larger than the largest peak numbers in the input sets. Please see more details at http://pgfe.umassmed.edu/ChIPpeakAnno/FAQ.html")
+	}
 	getCountsList<-function(counts){
 		CountsList <- list()
 		cnt <- 1
