@@ -1,3 +1,8 @@
+CHANGES IN VERSION 2.16.3
+------------------------
+BUG FIXES
+    o try to avoid the error when mart server does not work.
+
 CHANGES IN VERSION 2.16.2
 ------------------------
 NEW FEATURE
