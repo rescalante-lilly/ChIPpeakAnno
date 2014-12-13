@@ -16,11 +16,11 @@ function(peaks.RD, exon, TSS, utr5, utr3, proximal.promoter.cutoff=1000L, immedi
     introns <- unique(unlist(intronsByTranscript(TxDb)))
     fiveUTRs <- unique(unlist(fiveUTRsByTranscript(TxDb)))
     threeUTRs <- unique(unlist(threeUTRsByTranscript(TxDb)))
-    transcripts <- transcripts(TxDb, columns=NULL)
+    transcripts <- unique(transcripts(TxDb, columns=NULL))
     options(warn = -1)
     try({
-      promoters <- promoters(TxDb, upstream=proximal.promoter.cutoff, downstream=0)
-      immediateDownstream <- flank(transcripts, width=immediate.downstream.cutoff, start=FALSE, use.names=FALSE)
+      promoters <- unique(promoters(TxDb, upstream=proximal.promoter.cutoff, downstream=0))
+      immediateDownstream <- unique(flank(transcripts, width=immediate.downstream.cutoff, start=FALSE, use.names=FALSE))
     })
     microRNAs <- tryCatch(microRNAs(TxDb), error=function(e) return(NULL))
     tRNAs <- tryCatch(tRNAs(TxDb), error=function(e) return(NULL))
@@ -35,13 +35,16 @@ function(peaks.RD, exon, TSS, utr5, utr3, proximal.promoter.cutoff=1000L, immedi
       seqlevels(gr)[grepl("^(\\d+|MT|M|X|Y)$", seqlevels(gr))] <-
         paste("chr", seqlevels(gr)[grepl("^(\\d+|MT|M|X|Y)$", seqlevels(gr))], sep="")
       seqlevels(gr)[seqlevels(gr)=="chrMT"] <- "chrM"
-      gr
+      trim(gr)
     }
     peaks.RD <- formatSeqnames(peaks.RD)
     peaks.RD <- unique(peaks.RD)
     annotation <- lapply(annotation, formatSeqnames)
     annotation <- GRangesList(annotation)
     newAnno <- c(unlist(annotation))
+    newAnno.rd <- reduce(trim(newAnno))
+    Intergenic.Region <- gaps(newAnno.rd, end=seqlengths(TxDb))
+    Intergenic.Region <- Intergenic.Region[strand(Intergenic.Region)!="*"]
     if(!all(seqlevels(peaks.RD) %in% seqlevels(newAnno))){
       warning("peaks.RD has sequence levels not in TxDb.")
       sharedlevels <- intersect(seqlevels(newAnno), seqlevels(peaks.RD))
@@ -51,32 +54,35 @@ function(peaks.RD, exon, TSS, utr5, utr3, proximal.promoter.cutoff=1000L, immedi
     if(!is.null(precedence)){
       annotation <- annotation[unique(c(precedence,names(annotation)))]
     }
-    annotation$Intergenic.Region <- peaks.RD
+##    annotation$Intergenic.Region <- peaks.RD
+    names(Intergenic.Region) <- NULL
+    annotation$Intergenic.Region <- Intergenic.Region
     anno.names <- names(annotation)
     if(nucleotideLevel){
       ##create a new annotation GRanges
       newAnno <- c(newAnno, peaks.RD)
       ##create a splited cluster (no overlapps for all ranges)
       newAnno <- disjoin(newAnno)
+      annotation$peaks.RD <- peaks.RD
       ol.anno <- findOverlaps(newAnno, annotation)
       ##calculate Jaccard index
-      ol.anno.splited <- split(queryHits(ol.anno),anno.names[subjectHits(ol.anno)])
-      Intergenic.Region <- ol.anno.splited$Intergenic.Region
+      ol.anno.splited <- split(queryHits(ol.anno),names(annotation)[subjectHits(ol.anno)])
       jaccardIndex <- unlist(lapply(ol.anno.splited, function(.ele){
-        intersection <- intersect(.ele, Intergenic.Region)
-        union <- union(.ele, Intergenic.Region)
+        intersection <- intersect(.ele, ol.anno.splited$peaks.RD)
+        union <- union(.ele, ol.anno.splited$peaks.RD)
         length(intersection)/length(union)
       }))
       jaccardIndex <- jaccardIndex[anno.names]
+      names(jaccardIndex) <- anno.names
+      jaccardIndex[is.na(jaccardIndex)] <- 0
     }else{
       ol.anno <- findOverlaps(peaks.RD, annotation)
       ##calculate Jaccard index
       ol.anno.splited <- split(queryHits(ol.anno),anno.names[subjectHits(ol.anno)])
-      Intergenic.Region <- ol.anno.splited$Intergenic.Region
       jaccardIndex <- unlist(lapply(anno.names, function(.name){
-        union <- length(Intergenic.Region)+length(annotation[[.name]])-length(ol.anno.splited[[.name]])
-        intersection <- length(ol.anno.splited[[.name]])
-        intersection/union
+          union <- length(annotation[[.name]]) + length(peaks.RD) - length(ol.anno.splited[[.name]])
+          intersection <- length(ol.anno.splited[[.name]])
+          intersection/union
       }))
       names(jaccardIndex) <- anno.names
     }
@@ -85,13 +91,11 @@ function(peaks.RD, exon, TSS, utr5, utr3, proximal.promoter.cutoff=1000L, immedi
       ####keep the part in peaks.RD
       ol.anno <- ol.anno[ol.anno[,1] %in% unique(ol.anno[ol.anno[,2]==length(annotation),1]),]
     }
-    ####keep the part only annotated in peaks.RD for Intergenic.Region
+    ####keep the part only annotated in peaks.RD for peaks.RD
     ol.anno.splited <- split(ol.anno, ol.anno[,2])
-    hasAnnoHits <- do.call(rbind, ol.anno.splited[names(ol.anno.splited)!=as.character(length(anno.names))])
+    hasAnnoHits <- do.call(rbind, ol.anno.splited[names(ol.anno.splited)!=as.character(length(annotation))])
     hasAnnoHits <- unique(hasAnnoHits[,1])
-    ol.anno <- ol.anno[!(ol.anno[,2]==length(anno.names) & (ol.anno[,1] %in% hasAnnoHits)), ]    
-    ###recalculate Jaccard index for Intergenic.Region
-    jaccardIndex["Intergenic.Region"] <- nrow(ol.anno[ol.anno[,2]==as.character(length(anno.names)),])/length(Intergenic.Region)
+    ol.anno <- ol.anno[!(ol.anno[,2]==length(annotation) & (ol.anno[,1] %in% hasAnnoHits)), ]    
     if(!is.null(precedence)){
       ol.anno <- ol.anno[!duplicated(ol.anno[,1]), ]
     }

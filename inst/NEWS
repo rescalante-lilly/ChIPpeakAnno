@@ -1,3 +1,8 @@
+CHANGES IN VERSION 2.16.4
+------------------------
+BUG FIXES
+    o fix the bugs in calculating jaccard index in assignChromosomeRegion.
+
 CHANGES IN VERSION 2.16.3
 ------------------------
 BUG FIXES
