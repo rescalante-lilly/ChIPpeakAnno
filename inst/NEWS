@@ -1,0 +1,125 @@
+CHANGES IN VERSION 3.3.8
+-------------------------
+    o update the documentation
+
+
+CHANGES IN VERSION 3.3.7
+-------------------------
+FIX BUGS
+    o fix the problem in creating vignettes in linux platform.
+
+CHANGES IN VERSION 3.3.6
+-------------------------
+NEW FEATURE
+    o add new function featureAlignedSignal, featureAlignedDistribution,
+      featureAlignedHeatmap, pie1
+    o add new dataset HOT.spots, wgEncodeTfbsV3
+    o update annoGR class
+    o update vignettes
+
+CHANGES IN VERSION 3.3.5
+-------------------------
+NEW FEATURE
+    o remove all the RangedData
+    o add annoGR class
+    o update vignettes
+
+CHANGES IN VERSION 3.3.4
+-------------------------
+NEW FEATURE
+    o toGRanges from MACS2, narrowPeak.
+    o calculate the p value of overlapping peaks by reagioneR
+    o update documentation
+
+CHANGES IN VERSION 3.3.3
+-------------------------
+NEW FEATURE
+    o mergePlusMinusPeaks
+
+CHANGES IN VERSION 3.3.2
+-------------------------
+NEW FEATURE
+    o update citation
+
+CHANGES IN VERSION 3.3.1
+-------------------------
+NEW FEATURE
+    o add new citation
+
+CHANGES IN VERSION 3.0.1
+-------------------------
+BUG FIXES
+    o give errors when inputs of addGeneIDs is incorrect.
+
+CHANGES IN VERSION 3.0.0
+-------------------------
+NEW FEATURE
+
+     o From RangedData to Granges
+     o High efficiency
+     o Find Overlaps for more than 2 groups 
+     o Add Utility test 
+     o Add new function binOverFeature, egOrgMap.
+
+CHANGES IN VERSION 2.17.2
+------------------------
+NEW FEATURE
+
+    o add byBase for makeVennDiagram.
+
+CHANGES IN VERSION 2.11.4
+------------------------
+NEW FEATURE
+
+    o Add selection of 'shortestDistance' to output parameter of annotatePeakInBatch.
+
+
+CHANGES IN VERSION 2.12.3
+------------------------
+BUG FIXES
+
+    o relative postion for negative strand are not correct when call findOverlappingPeaks.
+
+CHANGES IN VERSION 2.11.4
+------------------------
+NEW FEATURE
+
+    o Add selection of 'shortestDistance' to output parameter of annotatePeakInBatch.
+
+CHANGES IN VERSION 2.11.3
+------------------------
+NEW FEATURE
+
+    o Improved efficiency of annotatePeakInBatch.
+
+CHANGES IN VERSION 2.9.6
+------------------------
+BUG FIXES
+
+    o Changed Enhancer.Silencer to intergenic.Region in assignChromosomeRegion.
+
+CHANGES IN VERSION 2.9.5
+------------------------
+BUG FIXES
+
+    o negative widths are not allowed when call findOverlappingPeaks.
+
+
+NEW FEATURES IN VERSION 2.2.0
+------------------------
+
+     o Find the peaks with bi-directional promoters with summary
+     statistics (peaksNearBDP).
+
+     o Summarize the occurrence of motifs in peaks
+     (summarizePatternInPeaks).
+
+     o Add other IDs to annotated peaks or enrichedGO (addGeneIDs)The
+     function makeVennDiagram supports 4-way venn diagram.
+
+     o Enriched Gene Ontology (GO) terms are annotated with a list of
+     genes which can be traced back to peaks.
+
+     o FAQ: http://pgfe.umassmed.edu/ChIPpeakAnno/FAQ.html.
+
+     o Summarize peak distribution over exon, intron, enhancer, proximal promoter, 5 prime UTR and 3 prime UTR (assignChromosomeRegion)
