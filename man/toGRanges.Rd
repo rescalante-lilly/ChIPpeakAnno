@@ -1,0 +1,113 @@
+\name{toGRanges}
+\alias{toGRanges}
+\alias{toGRanges,data.frame-method}
+\alias{toGRanges,TxDb-method}
+\alias{toGRanges,EnsDb-method}
+\alias{toGRanges,RangedData-method}
+\alias{toGRanges,connection-method}
+\alias{toGRanges,character-method}
+
+\title{
+  Convert dataset to GRanges
+}
+\description{
+  Convert UCSC BED format and its variants, such as GFF, or any user defined 
+  dataset such as RangedDate or MACS output file to GRanges
+}
+\usage{
+    \S4method{toGRanges}{character}(data, format=c("BED", "GFF",  
+                                  "MACS", "MACS2", 
+                                  "narrowPeak", "broadPeak",
+                                  "others"), 
+                   header=FALSE, comment.char="#", colNames=NULL, ...)
+    \S4method{toGRanges}{connection}(data, format=c("BED", "GFF",  
+                                  "MACS", "MACS2", 
+                                  "narrowPeak", "broadPeak",
+                                  "others"), 
+                   header=FALSE, comment.char="#", colNames=NULL, ...)
+    \S4method{toGRanges}{data.frame}(data, colNames=NULL, ...)
+    \S4method{toGRanges}{TxDb}(data, feature=c("gene", "transcript", "exon",
+                                   "CDS", "fiveUTR", "threeUTR",
+                                   "microRNA", "tRNAs", "geneModel"),
+                   OrganismDb, ...)
+    \S4method{toGRanges}{EnsDb}(data, 
+                   feature=c("gene", "transcript", "exon", "disjointExons"),
+                   ...)
+}
+\arguments{
+    \item{data}{an object of data.frame, 
+        \link[GenomicFeatures]{TxDb} or \link[ensembldb]{EnsDb}, or 
+        the file name of data to be imported. 
+        Alternatively, data can be a readable txt-mode connection (See ?read.table).}
+    \item{format}{
+    data format.  If the data format is set to BED, GFF, narrowPeak or broadPeak, 
+  please refer to http://genome.ucsc.edu/FAQ/FAQformat#format1 for column 
+  order. "MACS" is for converting the excel output file from MACS1. "MACS2" is 
+  for converting the output file from MACS2.
+    }
+    \item{feature}{annotation type}
+    \item{header}{
+  A logical value indicating whether the file contains the names of the 
+  variables as its first line. If missing, the value is determined from the 
+  file format: header is set to TRUE if and only if the first row contains one 
+  fewer field than the number of columns.
+}
+\item{comment.char}{
+  character: a character vector of length one containing a single character or 
+  an empty string. Use "" to turn off the interpretation of comments 
+  altogether.
+}
+  \item{colNames}{
+  If the data format is set to "others", colname must be defined. And the 
+  colname must contain
+  space, start and end. The column name for the chromosome # should be named 
+  as space.
+}
+    \item{\dots}{parameters passed to \link{read.table}}
+    \item{OrganismDb}{an object of \link[OrganismDbi]{OrganismDb}. It is used 
+        for extracting gene symbol for geneModel group for 
+        \link[GenomicFeatures]{TxDb}}
+}
+
+\value{
+ An object of \link[GenomicRanges:GRanges]{GRanges}
+}
+\author{
+  Jianhong Ou
+}
+\examples{
+  macs <- system.file("extdata", "MACS_peaks.xls", package="ChIPpeakAnno")
+  macsOutput <- toGRanges(macs, format="MACS")
+  if(interactive()){
+    ## MACS connection
+    macs <- readLines(macs)
+    macs <- textConnection(macs)
+    macsOutput <- toGRanges(macs, format="MACS")
+    ## bed
+    toGRanges(system.file("extdata", "MACS_output.bed", package="ChIPpeakAnno"),
+                format="BED")
+    ## narrowPeak
+    toGRanges(system.file("extdata", "peaks.narrowPeak", package="ChIPpeakAnno"),
+                format="narrowPeak")
+    ## broadPeak
+    toGRanges(system.file("extdata", "TAF.broadPeak", package="ChIPpeakAnno"),
+                format="broadPeak")
+    ## MACS2
+    toGRanges(system.file("extdata", "MACS2_peaks.xls", package="ChIPpeakAnno"),
+                format="MACS2")
+    ## GFF
+    toGRanges(system.file("extdata", "GFF_peaks.gff", package="ChIPpeakAnno"),
+                format="GFF")
+    ## EnsDb
+    library(EnsDb.Hsapiens.v75)
+    toGRanges(EnsDb.Hsapiens.v75, feature="gene")
+    ## TxDb
+    library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+    toGRanges(TxDb.Hsapiens.UCSC.hg19.knownGene, feature="gene")
+    ## data.frame
+    macs <- system.file("extdata", "MACS_peaks.xls", package="ChIPpeakAnno")
+    macs <- read.delim(macs, comment.char="#")
+    toGRanges(macs)
+  }
+}
+\keyword{ misc }

@@ -1,0 +1,215 @@
+CHANGES IN VERSION 3.5.18
+-------------------------
+    o Fix the bugs for featureAlignedSignal when features 
+    contain strand info.
+
+CHANGES IN VERSION 3.5.17
+-------------------------
+    o Fix the bugs for getEnrichedGO/PATH when recodes in 
+    database such as reactome database is not unique.
+    
+    
+CHANGES IN VERSION 3.5.16
+-------------------------
+    o fix the warning in windows for replacing previous import 
+
+CHANGES IN VERSION 3.5.15
+-------------------------
+    o not do log2 transform for featureAlignedSingal
+    
+CHANGES IN VERSION 3.5.14
+-------------------------
+    o remove NA for featureAlignedDistribution
+    o handle NA and infinite value for featureAlignedSingal
+    
+CHANGES IN VERSION 3.5.13
+-------------------------
+    o throw message when seqlevels are not identical 
+    for featureAlignedSignal
+    
+CHANGES IN VERSION 3.5.12
+-------------------------
+    o add new function summarizeOverlapsByBins.
+    
+CHANGES IN VERSION 3.5.11
+-------------------------
+    o clean output of findEnhancers
+    
+CHANGES IN VERSION 3.5.10
+-------------------------
+    o add new function findEnhancers
+    o normalize the output of gene region for binOverFeature
+    o change the documentation to avoid time-out error
+    
+CHANGES IN VERSION 3.5.9
+-------------------------
+    o merge peaksNearBDP and bdp function.
+    o improve oligoSummary.
+    o update the documentations.
+    
+CHANGES IN VERSION 3.5.8
+-------------------------
+    o change toGRanges from function to method
+    o update the documentations.
+
+CHANGES IN VERSION 3.5.7
+-------------------------
+    o change test from RUnit to testthat
+    o add new function addMetadata
+    o change the output and parameters of annoPeaks
+    o simple the parameter output of annotatePeakInBatch
+    o allow bdp function to accept GRanges annotation
+    o add error bar function for binOverFeature function
+    o remove the log file after plot for makeVennDiagram function
+    o add private function trimPeakList
+    o update the documentation of annoPeaks and annotatePeakInBatch
+    
+CHANGES IN VERSION 3.5.5
+-------------------------
+    o update the documentation to fix the typo in quickStart.
+    o change the default value of annoPeaks.
+    o update annoGR class to fix the error: 
+      identical(colnames(classinfo), colnames(out)) is not TRUE
+
+CHANGES IN VERSION 3.5.2
+-------------------------
+    o update the documentation to fix the error on windows (import bigwig error)
+    o avoid the output of addGeneIDs as factors
+
+CHANGES IN VERSION 3.5.1
+-------------------------
+    o update the documentation
+NEW FEATURE
+    o toGRanges can accept connection object
+    o add annoPeaks function
+    o add xget function
+    o update the peakPermTest algorithm to make more reasonable result.
+    o add oligoSummary function
+    o add IDRfilter function
+    o add reCenterPeaks function
+
+CHANGES IN VERSION 3.3.8
+-------------------------
+    o update the documentation
+
+
+CHANGES IN VERSION 3.3.7
+-------------------------
+FIX BUGS
+    o fix the problem in creating vignettes in linux platform.
+
+CHANGES IN VERSION 3.3.6
+-------------------------
+NEW FEATURE
+    o add new function featureAlignedSignal, featureAlignedDistribution,
+      featureAlignedHeatmap, pie1
+    o add new dataset HOT.spots, wgEncodeTfbsV3
+    o update annoGR class
+    o update vignettes
+
+CHANGES IN VERSION 3.3.5
+-------------------------
+NEW FEATURE
+    o remove all the RangedData
+    o add annoGR class
+    o update vignettes
+
+CHANGES IN VERSION 3.3.4
+-------------------------
+NEW FEATURE
+    o toGRanges from MACS2, narrowPeak.
+    o calculate the p value of overlapping peaks by reagioneR
+    o update documentation
+
+CHANGES IN VERSION 3.3.3
+-------------------------
+NEW FEATURE
+    o mergePlusMinusPeaks
+
+CHANGES IN VERSION 3.3.2
+-------------------------
+NEW FEATURE
+    o update citation
+
+CHANGES IN VERSION 3.3.1
+-------------------------
+NEW FEATURE
+    o add new citation
+
+CHANGES IN VERSION 3.0.1
+-------------------------
+BUG FIXES
+    o give errors when inputs of addGeneIDs is incorrect.
+
+CHANGES IN VERSION 3.0.0
+-------------------------
+NEW FEATURE
+
+     o From RangedData to Granges
+     o High efficiency
+     o Find Overlaps for more than 2 groups 
+     o Add Utility test 
+     o Add new function binOverFeature, egOrgMap.
+
+CHANGES IN VERSION 2.17.2
+------------------------
+NEW FEATURE
+
+    o add byBase for makeVennDiagram.
+
+CHANGES IN VERSION 2.11.4
+------------------------
+NEW FEATURE
+
+    o Add selection of 'shortestDistance' to output parameter of annotatePeakInBatch.
+
+
+CHANGES IN VERSION 2.12.3
+------------------------
+BUG FIXES
+
+    o relative postion for negative strand are not correct when call findOverlappingPeaks.
+
+CHANGES IN VERSION 2.11.4
+------------------------
+NEW FEATURE
+
+    o Add selection of 'shortestDistance' to output parameter of annotatePeakInBatch.
+
+CHANGES IN VERSION 2.11.3
+------------------------
+NEW FEATURE
+
+    o Improved efficiency of annotatePeakInBatch.
+
+CHANGES IN VERSION 2.9.6
+------------------------
+BUG FIXES
+
+    o Changed Enhancer.Silencer to intergenic.Region in assignChromosomeRegion.
+
+CHANGES IN VERSION 2.9.5
+------------------------
+BUG FIXES
+
+    o negative widths are not allowed when call findOverlappingPeaks.
+
+
+NEW FEATURES IN VERSION 2.2.0
+------------------------
+
+     o Find the peaks with bi-directional promoters with summary
+     statistics (peaksNearBDP).
+
+     o Summarize the occurrence of motifs in peaks
+     (summarizePatternInPeaks).
+
+     o Add other IDs to annotated peaks or enrichedGO (addGeneIDs)The
+     function makeVennDiagram supports 4-way venn diagram.
+
+     o Enriched Gene Ontology (GO) terms are annotated with a list of
+     genes which can be traced back to peaks.
+
+     o FAQ: http://pgfe.umassmed.edu/ChIPpeakAnno/FAQ.html.
+
+     o Summarize peak distribution over exon, intron, enhancer, proximal promoter, 5 prime UTR and 3 prime UTR (assignChromosomeRegion)

@@ -1,0 +1,78 @@
+import(BiocGenerics)
+import(Biobase)
+import(methods)
+importFrom(biomaRt, useMart, getBM, getSequence)
+importFrom(multtest, mt.rawp2adjp)
+importFrom(limma, vennCounts,vennDiagram)
+importFrom(stats, phyper)
+importClassFrom(graph, "graphNEL")
+importFrom(graph, ugraph)
+importFrom(RBGL, 
+           connectedComp)
+importFrom(AnnotationDbi, dbconn, select)
+importFrom(DBI, dbGetQuery)
+importFrom(regioneR, permTest, numOverlaps)
+importFrom(BiocInstaller, biocLite)
+import(IRanges)
+import(Biostrings)
+import(BSgenome)
+import(GO.db)
+import(grid)
+import(VennDiagram)
+importFrom(ensembldb, disjointExons, genes, exons, transcripts, dbconn)
+import(GenomicFeatures)
+import(GenomicRanges)
+import(GenomeInfoDb)
+import(S4Vectors)
+importFrom(GenomicAlignments, summarizeOverlaps, Union)
+importFrom(SummarizedExperiment, assay, rowRanges, SummarizedExperiment, colData)
+importFrom(idr, est.IDR)
+importFrom(seqinr, s2c, count, words)
+importFrom(matrixStats, rowMins, rowMaxs)
+importMethodsFrom(AnnotationDbi, mget, get, mappedkeys, 
+                  GOID, Term, Definition, Ontology)
+exportClass("bindist", "permPool", "annoGR")
+exportMethods("$", "$<-", "info", "annoGR")
+export( 
+       addAncestors,  
+       addGeneIDs,
+       addMetadata,
+       annoPeaks,
+       annotatePeakInBatch, 
+       assignChromosomeRegion, 
+       BED2RangedData,
+       binOverFeature,
+       condenseMatrixByColnames, 
+       convert2EntrezID,
+       countPatternInSeqs,
+       egOrgMap,
+       featureAlignedDistribution,
+       featureAlignedHeatmap,
+       featureAlignedSignal,
+       findEnhancers,
+       findOverlappingPeaks,
+       findOverlapsOfPeaks,
+       getAllPeakSequence, 
+       getAnnotation, 
+       getEnrichedGO,
+       getEnrichedPATH, 
+       getUniqueGOidCount, 
+       getVennCounts,
+       GFF2RangedData, 
+       hyperGtest,
+       IDRfilter,
+       makeVennDiagram, 
+       mergePlusMinusPeaks,
+       oligoFrequency,
+       oligoSummary,
+       peakPermTest,
+       peaksNearBDP,
+       pie1,
+       preparePool,
+       reCenterPeaks,
+       summarizeOverlapsByBins,
+       summarizePatternInPeaks,
+       toGRanges, 
+       translatePattern,
+       write2FASTA,
+       xget)
